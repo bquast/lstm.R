@@ -28,17 +28,13 @@ X1b <- int2bin(X1, length=8)
 X2b <- int2bin(X2, length=8)
 Yb  <- int2bin(Y,  length=8)
 
-# training dataset generation
-# int2binary = 
-binary_dim = 8
-
-largest_number = 2^binary_dim
-
 # input variables
 alpha = 0.1
 input_dim = 2
 hidden_dim = 16
 output_dim = 1
+binary_dim = 8
+largest_number = 2^binary_dim
 
 
 # initialize neural network weights
@@ -51,7 +47,7 @@ synapse_1_update = matrix(0, nrow = hidden_dim, ncol = output_dim)
 synapse_h_update = matrix(0, nrow = hidden_dim, ncol = hidden_dim)
 
 # training logic
-for (j in 1:length(X1b) {
+for (j in 1:length(X1b)) {
   
   # select input variables
   a = X1b[j,]
