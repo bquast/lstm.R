@@ -94,14 +94,14 @@ for (j in 1:10000) {
   
   future_layer_1_delta = matrix(0, nrow = 1, ncol = hidden_dim)
   
-  for (position in 0:(binary_dim-1)) {
+  for (position in 1:binary_dim) {
     
-    X = cbind(a[binary_dim-position], b[binary_dim-position])
-    layer_1 = layer_1_values[dim(layer_1_values)[1]-position,]
-    prev_layer_1 = layer_1_values[dim(layer_1_values)[1]-(position+1),]
+    X = cbind(a[binary_dim-(position-1)], b[binary_dim-(position-1)])
+    layer_1 = layer_1_values[dim(layer_1_values)[1]-(position-1),]
+    prev_layer_1 = layer_1_values[dim(layer_1_values)[1]-position,]
     
     # error at output layer
-    layer_2_delta = layer_2_deltas[dim(layer_2_deltas)[1]-position,]
+    layer_2_delta = layer_2_deltas[dim(layer_2_deltas)[1]-(position-1),]
     # error at hidden layer
     layer_1_delta = (future_layer_1_delta %*% t(synapse_h) + layer_2_delta %*% t(synapse_1)) * sigmoid_output_to_derivative(layer_1)
     
