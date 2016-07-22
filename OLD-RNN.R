@@ -24,9 +24,9 @@ X2 = sample(0:127, 10000, replace=TRUE)
 Y <- X1 + X2
 
 # convert to binary
-X1 <- int2bin(X1, length=8)
-X2 <- int2bin(X2, length=8)
-Y  <- int2bin(Y,  length=8)
+X1b <- int2bin(X1, length=8)
+X2b <- int2bin(X2, length=8)
+Yb  <- int2bin(Y,  length=8)
 
 # training dataset generation
 # int2binary = 
@@ -54,11 +54,11 @@ synapse_h_update = matrix(0, nrow = hidden_dim, ncol = hidden_dim)
 for (j in 1:10000) {
   
   # select input variables
-  a = X1[j,]
-  b = X2[j,]
+  a = X1b[j,]
+  b = X2b[j,]
   
   # response variable
-  c = Y[j,]
+  c = Yb[j,]
   
   # where we'll store our best guesss (binary encoded)
   d = matrix(0, nrow = 1, ncol = binary_dim)
