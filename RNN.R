@@ -37,14 +37,30 @@ binary_dim = 8
 largest_number = 2^binary_dim
 
 
-# initialize neural network weights
-synapse_0 = matrix(runif(n = input_dim *hidden_dim, min=-1, max=1), nrow=input_dim)
-synapse_1 = matrix(runif(n = hidden_dim*output_dim, min=-1, max=1), nrow=hidden_dim)
-synapse_h = matrix(runif(n = hidden_dim*hidden_dim, min=-1, max=1), nrow=hidden_dim)
+# initialise neural network weights
+synapse_0_i = matrix(runif(n = input_dim *hidden_dim, min=-1, max=1), nrow=input_dim)
+synapse_0_f = matrix(runif(n = input_dim *hidden_dim, min=-1, max=1), nrow=input_dim)
+synapse_0_o = matrix(runif(n = input_dim *hidden_dim, min=-1, max=1), nrow=input_dim)
+synapse_0_c = matrix(runif(n = input_dim *hidden_dim, min=-1, max=1), nrow=input_dim)
+synapse_1   = matrix(runif(n = hidden_dim*output_dim, min=-1, max=1), nrow=hidden_dim)
+synapse_h_i = matrix(runif(n = hidden_dim*hidden_dim, min=-1, max=1), nrow=hidden_dim)
+synapse_h_f = matrix(runif(n = hidden_dim*hidden_dim, min=-1, max=1), nrow=hidden_dim)
+synapse_h_o = matrix(runif(n = hidden_dim*hidden_dim, min=-1, max=1), nrow=hidden_dim)
+synapse_h_c = matrix(runif(n = hidden_dim*hidden_dim, min=-1, max=1), nrow=hidden_dim)
 
-synapse_0_update = matrix(0, nrow = input_dim,  ncol = hidden_dim)
-synapse_1_update = matrix(0, nrow = hidden_dim, ncol = output_dim)
-synapse_h_update = matrix(0, nrow = hidden_dim, ncol = hidden_dim)
+# initialise state cell
+c_t_m1      = matrix(0, nrow=1, ncol = hidden_dim)
+
+# initialise synapse updates
+synapse_0_i_update = matrix(0, nrow = input_dim, ncol = hidden_dim)
+synapse_0_f_update = matrix(0, nrow = input_dim, ncol = hidden_dim)
+synapse_0_o_update = matrix(0, nrow = input_dim, ncol = hidden_dim)
+synapse_0_c_update = matrix(0, nrow = input_dim, ncol = hidden_dim)
+synapse_1_update   = matrix(0, nrow = hidden_dim, ncol = output_dim)
+synapse_h_i_update = matrix(0, nrow = hidden_dim, ncol = hidden_dim)
+synapse_h_f_update = matrix(0, nrow = hidden_dim, ncol = hidden_dim)
+synapse_h_o_update = matrix(0, nrow = hidden_dim, ncol = hidden_dim)
+synapse_h_c_update = matrix(0, nrow = hidden_dim, ncol = hidden_dim)
 
 # training logic
 for (j in 1:length(X1)) {
@@ -72,7 +88,13 @@ for (j in 1:length(X1)) {
     y = c[position]
     
     # hidden layer (input ~+ prev_hidden)
-    layer_1 = sigmoid((X%*%synapse_0) + (layer_1_values[dim(layer_1_values)[1],] %*% synapse_h))
+    i_t     = sigmoid((X%*%synapse_0_i) + (layer_1_values[dim(layer_1_values)[1],] %*% synapse_h_i)) # add bias?
+    f_t     = sigmoid((X%*%synapse_0_f) + (layer_1_values[dim(layer_1_values)[1],] %*% synapse_h_f)) # add bias?
+    o_t     = sigmoid((X%*%synapse_0_o) + (layer_1_values[dim(layer_1_values)[1],] %*% synapse_h_o)) # add bias?
+    c_in_t  = tanh(   (X%*%synapse_0_c) + (layer_1_values[dim(layer_1_values)[1],] %*% synapse_h_c))
+    c_t     = (f_t * c_t_m1[dim(layer_1_values)[1],]) + (i_t * c_in_t)
+    layer_1 = o_t * tanh(c_t)
+    c_t_m1  = rbind(c_t_m1, c_t)
     
     # output layer (new binary representation)
     layer_2 = sigmoid(layer_1 %*% synapse_1)
@@ -88,7 +110,10 @@ for (j in 1:length(X1)) {
     # store hidden layer so we can print it out
     layer_1_values = rbind(layer_1_values, layer_1)                                                  }
   
-  future_layer_1_delta = matrix(0, nrow = 1, ncol = hidden_dim)
+  future_layer_1_i_delta = matrix(0, nrow = 1, ncol = hidden_dim)
+  future_layer_1_f_delta = matrix(0, nrow = 1, ncol = hidden_dim)
+  future_layer_1_o_delta = matrix(0, nrow = 1, ncol = hidden_dim)
+  future_layer_1_c_delta = matrix(0, nrow = 1, ncol = hidden_dim)
   
   for (position in 1:binary_dim) {
     
@@ -99,23 +124,53 @@ for (j in 1:length(X1)) {
     # error at output layer
     layer_2_delta = layer_2_deltas[dim(layer_2_deltas)[1]-(position-1),]
     # error at hidden layer
-    layer_1_delta = (future_layer_1_delta %*% t(synapse_h) + layer_2_delta %*% t(synapse_1)) * sigmoid_output_to_derivative(layer_1)
+    layer_1_i_delta = (future_layer_1_i_delta %*% t(synapse_h_i) + layer_2_delta %*% t(synapse_1)) *
+      sigmoid_output_to_derivative(layer_1)
+    layer_1_f_delta = (future_layer_1_f_delta %*% t(synapse_h_f) + layer_2_delta %*% t(synapse_1)) *
+      sigmoid_output_to_derivative(layer_1)
+    layer_1_o_delta = (future_layer_1_o_delta %*% t(synapse_h_o) + layer_2_delta %*% t(synapse_1)) *
+      sigmoid_output_to_derivative(layer_1)
+    layer_1_c_delta = (future_layer_1_c_delta %*% t(synapse_h_c) + layer_2_delta %*% t(synapse_1)) *
+      sigmoid_output_to_derivative(layer_1)
+    
     
     # let's update all our weights so we can try again
-    synapse_1_update = synapse_1_update + matrix(layer_1) %*% layer_2_delta
-    synapse_h_update = synapse_h_update + matrix(prev_layer_1) %*% layer_1_delta
-    synapse_0_update = synapse_0_update + t(X) %*% layer_1_delta
+    synapse_1_update   = synapse_1_update   + matrix(layer_1)      %*% layer_2_delta
+    synapse_h_i_update = synapse_h_i_update + matrix(prev_layer_1) %*% layer_1_i_delta
+    synapse_h_f_update = synapse_h_f_update + matrix(prev_layer_1) %*% layer_1_f_delta
+    synapse_h_o_update = synapse_h_o_update + matrix(prev_layer_1) %*% layer_1_o_delta
+    synapse_h_c_update = synapse_h_c_update + matrix(prev_layer_1) %*% layer_1_c_delta
+    synapse_0_i_update = synapse_0_i_update + t(X) %*% layer_1_i_delta
+    synapse_0_f_update = synapse_0_f_update + t(X) %*% layer_1_f_delta
+    synapse_0_o_update = synapse_0_o_update + t(X) %*% layer_1_o_delta
+    synapse_0_c_update = synapse_0_c_update + t(X) %*% layer_1_c_delta
     
-    future_layer_1_delta = layer_1_delta                             }
+    future_layer_1_i_delta = layer_1_i_delta
+    future_layer_1_f_delta = layer_1_f_delta
+    future_layer_1_o_delta = layer_1_o_delta
+    future_layer_1_c_delta = layer_1_c_delta
+    }
   
   
-  synapse_0 = synapse_0 + ( synapse_0_update * alpha )
-  synapse_1 = synapse_1 + ( synapse_1_update * alpha )
-  synapse_h = synapse_h + ( synapse_h_update * alpha )
+  synapse_0_i = synapse_0_i + ( synapse_0_i_update * alpha )
+  synapse_0_f = synapse_0_f + ( synapse_0_f_update * alpha )
+  synapse_0_o = synapse_0_o + ( synapse_0_o_update * alpha )
+  synapse_0_c = synapse_0_c + ( synapse_0_c_update * alpha )
+  synapse_1   = synapse_1   + ( synapse_1_update   * alpha )
+  synapse_h_i = synapse_h_i + ( synapse_h_i_update * alpha )
+  synapse_h_f = synapse_h_f + ( synapse_h_f_update * alpha )
+  synapse_h_o = synapse_h_o + ( synapse_h_o_update * alpha )
+  synapse_h_c = synapse_h_c + ( synapse_h_c_update * alpha )
   
-  synapse_0_update = synapse_0_update * 0
-  synapse_1_update = synapse_1_update * 0
-  synapse_h_update = synapse_h_update * 0
+  synapse_0_i_update = synapse_0_i_update * 0
+  synapse_0_f_update = synapse_0_f_update * 0
+  synapse_0_o_update = synapse_0_o_update * 0
+  synapse_0_c_update = synapse_0_c_update * 0
+  synapse_1_update   = synapse_1_update   * 0
+  synapse_h_i_update = synapse_h_i_update * 0
+  synapse_h_f_update = synapse_h_f_update * 0
+  synapse_h_o_update = synapse_h_o_update * 0
+  synapse_h_c_update = synapse_h_c_update * 0
   
   # print out progress
   if(j %% 1000 ==0) {
