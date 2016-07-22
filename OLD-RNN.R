@@ -2,7 +2,7 @@
 
 ## convert integer to binary
 i2b <- function(integer, length=8)
-  rev(as.numeric(intToBits(integer))[1:length])
+  as.numeric(intToBits(integer))[1:length]
 
 ## apply 
 int2bin <- function(integer, length=8)
@@ -67,14 +67,13 @@ for (j in 1:10000) {
   
   layer_2_deltas = matrix(0)
   layer_1_values = matrix(0, nrow=1, ncol = hidden_dim)
-  # layer_1_values = rbind(layer_1_values, matrix(0, nrow=1, ncol=hidden_dim))
   
   # moving along the positions in the binary encoding
   for (position in 0:(binary_dim-1)) {
     
     # generate input and output
-    X = cbind(a[binary_dim - position],b[binary_dim - position])
-    y = c[binary_dim - position]
+    X = cbind(a[position+1],b[position+1])
+    y = c[position+1]
     
     # hidden layer (input ~+ prev_hidden)
     layer_1 = sigmoid((X%*%synapse_0) + (layer_1_values[dim(layer_1_values)[1],] %*% synapse_h))
@@ -88,7 +87,7 @@ for (j in 1:10000) {
     overallError = overallError + abs(layer_2_error)
     
     # decode estimate so we can print it out
-    d[binary_dim - position] = round(layer_2)
+    d[position+1] = round(layer_2)
     
     # store hidden layer so we can print it out
     layer_1_values = rbind(layer_1_values, layer_1)                                                  }
@@ -97,7 +96,7 @@ for (j in 1:10000) {
   
   for (position in 0:(binary_dim-1)) {
     
-    X = cbind(a[position+1], b[position+1])
+    X = cbind(a[binary_dim-position], b[binary_dim-position])
     layer_1 = layer_1_values[dim(layer_1_values)[1]-position,]
     prev_layer_1 = layer_1_values[dim(layer_1_values)[1]-(position+1),]
     
