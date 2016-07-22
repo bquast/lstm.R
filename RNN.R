@@ -51,7 +51,7 @@ synapse_1_update = matrix(0, nrow = hidden_dim, ncol = output_dim)
 synapse_h_update = matrix(0, nrow = hidden_dim, ncol = hidden_dim)
 
 # training logic
-for (j in 1:10000) {
+for (j in 1:length(X1b) {
   
   # select input variables
   a = X1b[j,]
