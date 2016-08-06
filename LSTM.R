@@ -108,7 +108,9 @@ for (j in 1:length(X1)) {
     d[position] = round(layer_2)
     
     # store hidden layer so we can print it out
-    layer_1_values = rbind(layer_1_values, layer_1)                                                  }
+    layer_1_values = rbind(layer_1_values, layer_1)
+    
+  }
   
   future_layer_1_i_delta = matrix(0, nrow = 1, ncol = hidden_dim)
   future_layer_1_f_delta = matrix(0, nrow = 1, ncol = hidden_dim)
@@ -180,4 +182,6 @@ for (j in 1:length(X1)) {
     out = 0
     for (x in 1:length(d)) {
       out[x] = rev(d)[x]*2^(x-1) }
-    print("----------------")                     }             }
+    print("----------------")
+  }
+}
