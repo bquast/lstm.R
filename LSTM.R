@@ -148,13 +148,13 @@ for (j in 1:length(X1)) {
     layer_2_delta = layer_2_deltas[dim(layer_2_deltas)[1]-(position-1),]
     # error at hidden layer
     layer_1_i_delta = (future_layer_1_i_delta %*% t(synapse_h_i) + layer_2_delta %*% t(synapse_1)) *
-      sigmoid_output_to_derivative(layer_1)
+      sigmoid_output_to_derivative(tanh_output_to_derivative(layer_1))
     layer_1_f_delta = (future_layer_1_f_delta %*% t(synapse_h_f) + layer_2_delta %*% t(synapse_1)) *
-      sigmoid_output_to_derivative(layer_1)
+      sigmoid_output_to_derivative(tanh_output_to_derivative(layer_1))
     layer_1_o_delta = (future_layer_1_o_delta %*% t(synapse_h_o) + layer_2_delta %*% t(synapse_1)) *
       sigmoid_output_to_derivative(layer_1)
     layer_1_c_delta = (future_layer_1_c_delta %*% t(synapse_h_c) + layer_2_delta %*% t(synapse_1)) *
-      sigmoid_output_to_derivative(layer_1)
+      tanh_output_to_derivative(tanh_output_to_derivative(layer_1))
     
     
     # let's update all our weights so we can try again
