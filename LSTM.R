@@ -65,8 +65,6 @@ synapse_b_f = runif(n = hidden_dim, min=-init_weight, max=init_weight)
 synapse_b_o = runif(n = hidden_dim, min=-init_weight, max=init_weight)
 synapse_b_c = runif(n = hidden_dim, min=-init_weight, max=init_weight)
 
-# initialise state cell
-c_t_m1      = matrix(0, nrow=1, ncol = hidden_dim)
 
 # initialise synapse updates
 synapse_0_i_update = matrix(0, nrow = input_dim, ncol = hidden_dim)
@@ -107,6 +105,9 @@ for (j in 1:length(X1)) {
     # generate input and output
     X = cbind(a[position],b[position])
     y = c[position]
+    
+    # initialise state cell
+    c_t_m1      = matrix(0, nrow=1, ncol = hidden_dim)
     
     # hidden layer (input ~+ prev_hidden)
     i_t     = sigmoid((X%*%synapse_0_i) + (layer_1_values[dim(layer_1_values)[1],] %*% synapse_h_i) + synapse_b_i) # add bias?
