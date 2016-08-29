@@ -99,15 +99,15 @@ for (j in 1:length(X1)) {
   layer_2_deltas = matrix(0)
   layer_1_values = matrix(0, nrow=1, ncol = hidden_dim)
   
+  # initialise state cell
+  c_t_m1      = matrix(0, nrow=1, ncol = hidden_dim)
+    
   # moving along the positions in the binary encoding
   for (position in 1:binary_dim) {
     
     # generate input and output
     X = cbind(a[position],b[position])
     y = c[position]
-    
-    # initialise state cell
-    c_t_m1      = matrix(0, nrow=1, ncol = hidden_dim)
     
     # hidden layer (input ~+ prev_hidden)
     i_t     = sigmoid((X%*%synapse_0_i) + (layer_1_values[dim(layer_1_values)[1],] %*% synapse_h_i) + synapse_b_i) # add bias?
